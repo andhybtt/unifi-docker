@@ -30,6 +30,9 @@ services:
       # Konfigurasi vital untuk Backend UniFi (HTTPS)
       - "traefik.http.services.unifi-gui.loadbalancer.server.port=8443"
       - "traefik.http.services.unifi-gui.loadbalancer.server.scheme=https"
+      # Bypass self-signed SSL UniFi dengan membuat custom transport
+      - "traefik.http.serverstransports.unifi-transport.insecureskipverify=true"
+      - "traefik.http.services.unifi-gui.loadbalancer.server.serverstransport=unifi-transport"
     volumes:
       - unifi-dir:/unifi
       - unifi-data:/unifi/data
