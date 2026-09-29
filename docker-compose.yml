@@ -32,7 +32,7 @@ services:
       - "traefik.http.services.unifi-gui.loadbalancer.server.scheme=https"
       # Bypass self-signed SSL UniFi dengan membuat custom transport
       - "traefik.http.serverstransports.unifi-transport.insecureskipverify=true"
-      - "traefik.http.services.unifi-gui.loadbalancer.server.serverstransport=unifi-transport"
+      - "traefik.http.services.unifi-gui.loadbalancer.serverstransport=unifi-transport@docker"
     volumes:
       - unifi-dir:/unifi
       - unifi-data:/unifi/data
