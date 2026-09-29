@@ -19,20 +19,7 @@ services:
     init: true
     networks:
       - unifi-internal
-      - dokploy-network
     restart: always
-    labels:
-      - "traefik.enable=true"
-      # Ganti unifi.domainanda.com dengan domain asli Anda
-      - "traefik.http.routers.unifi-gui.rule=Host(`unifi.sknddev.com`)"
-      # Wajib beritahu Traefik network mana yang dipakai
-      - "traefik.docker.network=dokploy-network"
-      # Konfigurasi vital untuk Backend UniFi (HTTPS)
-      - "traefik.http.services.unifi-gui.loadbalancer.server.port=8443"
-      - "traefik.http.services.unifi-gui.loadbalancer.server.scheme=https"
-      # Bypass self-signed SSL UniFi dengan membuat custom transport
-      - "traefik.http.serverstransports.unifi-transport.insecureskipverify=true"
-      - "traefik.http.services.unifi-gui.loadbalancer.serverstransport=unifi-transport@docker"
     volumes:
       - unifi-dir:/unifi
       - unifi-data:/unifi/data
@@ -53,6 +40,18 @@ services:
       JVM_INIT_HEAP_SIZE: ${JVM_INIT_HEAP_SIZE}
       UNIFI_STDOUT: ${UNIFI_STDOUT}
       SYSTEM_IP: ${SYSTEM_IP}
+
+  unifi-web:
+    image: nginx:alpine
+    container_name: unifi-web
+    depends_on:
+      - unifi-controller
+    networks:
+      - unifi-internal
+      - dokploy-network
+    restart: always
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
 
   unifi-logs:
     image: bash
