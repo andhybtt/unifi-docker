@@ -25,14 +25,11 @@ services:
       - "traefik.enable=true"
       # Ganti unifi.domainanda.com dengan domain asli Anda
       - "traefik.http.routers.unifi-gui.rule=Host(`unifi.sknddev.com`)"
-      - "traefik.http.routers.unifi-gui.entrypoints=websecure"
-      # Wajib beritahu Traefik network mana yang dipakai (karena ada 2 network)
+      # Wajib beritahu Traefik network mana yang dipakai
       - "traefik.docker.network=dokploy-network"
       # Konfigurasi vital untuk Backend UniFi (HTTPS)
       - "traefik.http.services.unifi-gui.loadbalancer.server.port=8443"
       - "traefik.http.services.unifi-gui.loadbalancer.server.scheme=https"
-      # Bypass verifikasi SSL internal jika sertifikat bawaan UniFi self-signed
-      - "traefik.http.services.unifi-gui.loadbalancer.server.serversTransport=insecureTransport"
     volumes:
       - unifi-dir:/unifi
       - unifi-data:/unifi/data
