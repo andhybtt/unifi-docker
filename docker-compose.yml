@@ -11,7 +11,8 @@ services:
       - unifi-dbcfg:/data/configdb
       
   unifi-controller:
-    image: "jacobalberty/unifi:${TAG:-latest}"
+    build: .
+    image: unifi-controller-local:10.4.57
     container_name: unifi-controller
     depends_on:
       - unifi-mongo
