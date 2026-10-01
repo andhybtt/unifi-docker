@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   unifi-mongo:
     image: mongo:3.6
@@ -9,16 +8,29 @@ services:
     volumes:
       - unifi-db:/data/db
       - unifi-dbcfg:/data/configdb
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   unifi-controller:
     build: .
     image: unifi-controller-local:10.4.57
     container_name: unifi-controller
     depends_on:
-      - unifi-mongo
+      unifi-mongo:
+        condition: service_healthy
     init: true
     networks:
       - unifi-internal
+      - dokploy-network
+    ports:
+      # Port yang TIDAK bisa di-reverse-proxy oleh Nginx (UDP)
+      - "3478:3478/udp"   # STUN — wajib untuk adopt & operasi
+      - "10001:10001/udp" # AP Discovery (opsional)
+      - "6789:6789/tcp"   # Speed Test (opsional)
+      # Port 8080 (Inform) di-proxy oleh Nginx via /inform
     restart: always
     volumes:
       - unifi-dir:/unifi
@@ -40,12 +52,19 @@ services:
       JVM_INIT_HEAP_SIZE: ${JVM_INIT_HEAP_SIZE}
       UNIFI_STDOUT: ${UNIFI_STDOUT}
       SYSTEM_IP: ${SYSTEM_IP}
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/docker-healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 5m
 
   unifi-web:
     image: nginx:alpine
     container_name: unifi-web
     depends_on:
-      - unifi-controller
+      unifi-controller:
+        condition: service_healthy
     networks:
       - unifi-internal
       - dokploy-network
